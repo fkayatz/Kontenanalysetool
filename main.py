@@ -9,7 +9,7 @@ Model       - Datenhaltung
 View        - Präsentation / Darstellung / Benutzerinteraktion
 Controller  - Logik / Aufbereitung / Bearbeitung
 '''
-import controller.datenimport as datenimport
+from controller import datenimport
 
 
 
