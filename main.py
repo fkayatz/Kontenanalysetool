@@ -51,9 +51,17 @@ if __name__ == '__main__':
     df_konto_einzahlungen=datenfilter.filter_positiv(df_daten, 'Betrag', True)
     df_konto_auszahlungen=datenfilter.filter_positiv(df_daten, 'Betrag', False)
     
+    #Erstellung von 2 DataFrames Einzahlung vom Kontoinhaber und Einzahlungen von sonstigen
+    df_einzahlungen_von_inhaber=df_konto_einzahlungen[df_konto_einzahlungen['Auftraggeber/Empfänger'].str.contains('Fabian Kayatz|Christina Kayatz|Familie Kayatz', case=False, na=False)]
+    df_einzahlungen_ohne_inhaber=df_konto_einzahlungen[df_konto_einzahlungen['Auftraggeber/Empfänger'].str.contains('Fabian Kayatz|Christina Kayatz|Familie Kayatz', case=False, na=False)==False]
+    
+    #Erstellung von 2 DataFrames Auszahlung vom Kontoinhaber und Auszahlungen von sonstigen
+    df_auszahlungen_zu_inhaber=df_konto_auszahlungen[df_konto_auszahlungen['Auftraggeber/Empfänger'].str.contains('Fabian Kayatz|Christina Kayatz|Familie Kayatz', case=False, na=True)]
+    df_auszahlungen_ohne_inhaber=df_konto_auszahlungen[df_konto_auszahlungen['Auftraggeber/Empfänger'].str.contains('Fabian Kayatz|Christina Kayatz|Familie Kayatz', case=False, na=True)==False]
+    
     #Gruppieren der Datenframes Einzahlungen und Auszahlungen nach Auftraggeber und Sortieren nach der Betragssumme
-    df_quelle_einzahlung=df_konto_einzahlungen['Betrag'].groupby(df_konto_einzahlungen['Auftraggeber/Empfänger']).sum().sort_values(ascending=False)
-    df_quelle_auszahlung=df_konto_auszahlungen['Betrag'].groupby(df_konto_auszahlungen['Auftraggeber/Empfänger']).sum().sort_values(ascending=True)
+    df_quelle_einzahlung=df_einzahlungen_ohne_inhaber['Betrag'].groupby(df_einzahlungen_ohne_inhaber['Auftraggeber/Empfänger']).sum().sort_values(ascending=False)
+    df_quelle_auszahlung=df_auszahlungen_ohne_inhaber['Betrag'].groupby(df_auszahlungen_ohne_inhaber['Auftraggeber/Empfänger']).sum().sort_values(ascending=True) #hier sind noch die Kayatz enthalten
     '''
     AUSGABE
     '''
