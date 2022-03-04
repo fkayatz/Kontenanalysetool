@@ -12,6 +12,7 @@ Controller  - Logik / Aufbereitung / Bearbeitung
 from controller import datenimport
 from controller import datenaufbereitung
 from controller import datenfilter
+from view import ploterzeugung
 
 
 
@@ -65,4 +66,9 @@ if __name__ == '__main__':
     '''
     AUSGABE
     '''
+
+    #Sankey-Plot Einnahmen und Ausgaben
+    ploterzeugung.create_sankey_plot(df_quelle_einzahlung, abs(df_quelle_auszahlung))
+    
+    #Datenausgabe
     print(df_daten)
