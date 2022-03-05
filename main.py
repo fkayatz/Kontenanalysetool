@@ -15,8 +15,6 @@ from controller import datenfilter
 from view import ploterzeugung
 
 
-
-
 if __name__ == '__main__':
     print(__name__)
     
@@ -47,6 +45,7 @@ if __name__ == '__main__':
     EINZAHLUNGEN UND AUSZAHLUNGEN AUF DAS KONTO
     1. Erstellung der DataFrames df_konto_einzahlungen und df_konto_auszahlungen
     2. Gruppieren der Dataframes nach dem Auftraggeber und Sortieren nach der Betragssumme
+    3. Zusammenfassen ähnlicher Ausgabengruppen
     '''
     #Erstellung von 2 Dataframes mit den Einzahlungen und Auszahlungen auf das Konto
     df_konto_einzahlungen=datenfilter.filter_positiv(df_daten, 'Betrag', True)
@@ -63,11 +62,15 @@ if __name__ == '__main__':
     #Gruppieren der Datenframes Einzahlungen und Auszahlungen nach Auftraggeber und Sortieren nach der Betragssumme
     df_quelle_einzahlung=df_einzahlungen_ohne_inhaber['Betrag'].groupby(df_einzahlungen_ohne_inhaber['Auftraggeber/Empfänger']).sum().sort_values(ascending=False)
     df_quelle_auszahlung=df_auszahlungen_ohne_inhaber['Betrag'].groupby(df_auszahlungen_ohne_inhaber['Auftraggeber/Empfänger']).sum().sort_values(ascending=True) #hier sind noch die Kayatz enthalten
+    
+    #Zusammenfassen ähnlicher Gruppen
+    datenfilter.sortieren_in_kategorien(df_quelle_auszahlung)
+    
     '''
     AUSGABE
+    1. Erstellen eines Sankey-Plots für Ein- und Auszahlungen
     '''
-
-    #Sankey-Plot Einnahmen und Ausgaben
+    #Sankey-Plot Ein- und Auszahlung ohne Kontoinhaber
     ploterzeugung.create_sankey_plot(df_quelle_einzahlung, abs(df_quelle_auszahlung))
     
     #Datenausgabe

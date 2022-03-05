@@ -9,11 +9,10 @@ import pandas as pd
 
 def create_sankey_plot(df_1,df_2):
 
-    df_fig=pd.concat([df_1,df_2], axis=0)
     label_fig=list(df_1.index)+['Umsatz']+list(df_2.index)
     source_fig= list(range(0,len(df_1),1))+len(df_2)*[len(df_1)]
     target_fig=len(df_1)*[len(df_1)]+list(range(len(df_1)+1,len(df_1)+len(df_2)+1,1))
-    value_fig=list(df_fig)
+    value_fig=list(pd.concat([df_1,df_2], axis=0))
     
     fig = go.Figure(data=[go.Sankey(
     node = dict(
