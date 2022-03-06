@@ -64,15 +64,21 @@ if __name__ == '__main__':
     df_quelle_auszahlung=df_auszahlungen_ohne_inhaber['Betrag'].groupby(df_auszahlungen_ohne_inhaber['Auftraggeber/Empfänger']).sum().sort_values(ascending=True) #hier sind noch die Kayatz enthalten
     
     #Zusammenfassen ähnlicher Gruppen
-    datenfilter.sortieren_in_kategorien(df_quelle_auszahlung)
+    datenfilter.sortieren_in_konsumkategorien(df_quelle_auszahlung)
+    
+    #Sortieren der Ausgaben in Kategorien    
+    df_konto_grouped_auszahlungen=datenfilter.sortieren_in_kategorien(df_konto_auszahlungen)
+    
+    #Quelle ausgeben NUR VORÜBERGEHEND ALS ÜBERBLICK  
+    df_quelle_auszahlung_all=df_konto_grouped_auszahlungen['Betrag'].groupby(df_konto_grouped_auszahlungen['Kategorie']).sum()
+    
     
     '''
     AUSGABE
     1. Erstellen eines Sankey-Plots für Ein- und Auszahlungen
     '''
     #Sankey-Plot Ein- und Auszahlung ohne Kontoinhaber
-    ploterzeugung.create_sankey_plot(df_quelle_einzahlung, abs(df_quelle_auszahlung))
+    #ploterzeugung.create_sankey_plot(df_quelle_einzahlung, abs(df_quelle_auszahlung))
     
     #Datenausgabe
     print(df_daten)
-    #test hauptzweig

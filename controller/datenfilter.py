@@ -4,6 +4,9 @@ Created on Mon Feb 21 20:39:13 2022
 
 @author: Fabian Kayatz
 """
+
+import numpy as np
+
 def  filter_positiv (daten, spalte, vergleichselement):
     #Durchsuchen des Dataframes nach Werten größer gleich 0
     list_filter=daten[spalte]>=0
@@ -14,6 +17,22 @@ def  filter_positiv (daten, spalte, vergleichselement):
     return(df_filter)
 
 def sortieren_in_kategorien(df):
+    dict_kategorie={'Sparen':'spar',
+                    'Notgroschen':'notgroschen',
+                    'Wertpapier': 'wp-rechnung|isin',
+                    'Reisen': 'reisen|urlaub',
+                    'Spenden': 'spend|hilfe',
+                    }
+
+    for kategorie in dict_kategorie:
+        filter_kategorie=df['Verwendungszweck'].str.contains(dict_kategorie[kategorie], case=False, na=False)
+        df.loc[filter_kategorie,'Kategorie']=kategorie
+    
+    df['Kategorie'].replace([np.nan],'Konsum', inplace=True)
+    
+    return(df)
+
+def sortieren_in_konsumkategorien(df):
     dict_kategorie={'Lebensmittel':'kaufland|konsum|frida|lidl|aldi|netto|edeka|penny|rewe|simmel|lebensmittelhandel|restaurant|nordsee gmbh|mcdonalds|burger king|dominos|baeck|backerei|backhaus|menu|sodexo|kochloeffel',
                     'Mobilität':'tankstelle|esso|star|tamoil|orlen|aral|total service station|Kraftfahrzeug|kfz|reifen|autohaus|parking|garage|parkhaus|bike|fahrrad|db vertrieb|handyticket',
                     'Kleidung & Schuhe':'esprit|h+m|s.oliver|sport scheck|peek & cloppenburg|ernstings fam|zalando|jack&jones|textilhandel|reno|deichmann',
