@@ -13,7 +13,8 @@ from controller import datenimport
 from controller import datenaufbereitung
 from controller import datenfilter
 from controller import datenauswertung
-from view import ploterzeugung
+from controller import datenkategorien
+from view import datenplots
 
 
 if __name__ == '__main__':
@@ -45,18 +46,49 @@ if __name__ == '__main__':
     '''
     EINZAHLUNGEN UND AUSZAHLUNGEN AUF DAS KONTO
     1. Erstellung der DataFrames df_konto_einzahlungen und df_konto_auszahlungen
-    2. Zuordnung der Auszahlungen in Haupt- und Unterkategorien
-    2. Gruppieren der Dataframes nach dem Auftraggeber und Sortieren nach der Betragssumme
-    3. Zusammenfassen ähnlicher Ausgabengruppen
+    2. Zuordnung der Ein- und Auszahlungen in Haupt- und Unterkategorien
+    3. Erstellung einer Ein- und Auszahlungsübersicht über Kategorie und Zeitintervall
+    4. Erstellung eines DataFrames mit Auswertungen pro Zeitintervall
+    5. Erstellung eines DateFrames welches den Mittelwert der Werte über einen Zeitraum bestimmt
     '''
     #Erstellung von 2 Dataframes mit den Einzahlungen und Auszahlungen auf das Konto
     df_konto_einzahlungen=datenfilter.filter_positiv(df_daten, 'Betrag', True)
     df_konto_auszahlungen=datenfilter.filter_positiv(df_daten, 'Betrag', False)
     
-    #Zuordnung der Auszahlung in Haupt- und Unterkategorien
-    df_auszahlung_kategorien=datenfilter.sortieren_in_kategorien(df_konto_auszahlungen)
-    print(df_auszahlung_kategorien['Betrag'].groupby(df_auszahlung_kategorien['Unterkategorie']).sum().sort_values(ascending=True))
+    #Zuordnung der Einzahlung bzw. Auszahlungen in Haupt- und Unterkategorien
+    df_einzahlung_kategorien=datenkategorien.daten_kategorien_zuordnen(df_konto_einzahlungen)
+    df_auszahlung_kategorien=datenkategorien.daten_kategorien_zuordnen(df_konto_auszahlungen)
+    #print(df_auszahlung_kategorien['Betrag'].groupby(df_auszahlung_kategorien['Unterkategorie']).sum().sort_values(ascending=True))
     
+    #Erstellen eines DataFrames mit einer Einzahlungs- bzw. Auszahlungsübersicht über Unterkategorie und Monat
+    df_einzahlung_pro_kategorie_monat = datenauswertung.summieren_pro_kategorie_zeitintervall(df_einzahlung_kategorien, 
+                                                                                              'Buchung', 
+                                                                                              'M', 
+                                                                                              'Unterkategorie'
+                                                                                              )
+    
+    df_auszahlung_pro_kategorie_monat = datenauswertung.summieren_pro_kategorie_zeitintervall(df_auszahlung_kategorien, 
+                                                                                              'Buchung', 
+                                                                                              'M', 
+                                                                                              'Unterkategorie'
+                                                                                              )
+    
+    #Erstellen eines DataFrames mit einer Auswertung über das Zeitintervall/Monat (aktuelle Baustelle)   
+    df_auswertung_pro_monat=datenauswertung.erstellen_auswertung_pro_zeitintervall(df_einzahlung_kategorien, 
+                                                                                   df_auszahlung_kategorien, 
+                                                                                   'M'
+                                                                                   )
+    df_auswertung_pro_jahr=datenauswertung.erstellen_auswertung_pro_zeitintervall(df_einzahlung_kategorien, 
+                                                                                  df_auszahlung_kategorien, 
+                                                                                  'Y'
+                                                                                  )
+    
+    #Berechnung der Mittelwertdaten über die letzten Monate
+    df_auswertung_pro_monat_mw12=datenauswertung.mittelwert_ueber_zeitraum(df_auswertung_pro_monat, 12, 3)
+    
+    #Berechnung der Standardabweichung über die letzten Monate
+    df_auswertung_pro_monat_stabw12=datenauswertung.stabw_ueber_zeitraum(df_auswertung_pro_monat, 12, 3)
+    '''
     #Erstellung von 2 DataFrames Einzahlung vom Kontoinhaber und Einzahlungen von sonstigen
     df_einzahlungen_von_inhaber=df_konto_einzahlungen[df_konto_einzahlungen['Auftraggeber/Empfänger'].str.contains('Fabian Kayatz|Christina Kayatz|Familie Kayatz', case=False, na=False)]
     df_einzahlungen_ohne_inhaber=df_konto_einzahlungen[df_konto_einzahlungen['Auftraggeber/Empfänger'].str.contains('Fabian Kayatz|Christina Kayatz|Familie Kayatz', case=False, na=False)==False]
@@ -68,26 +100,48 @@ if __name__ == '__main__':
     #Gruppieren der Datenframes Einzahlungen und Auszahlungen nach Auftraggeber und Sortieren nach der Betragssumme
     df_quelle_einzahlung=df_einzahlungen_ohne_inhaber['Betrag'].groupby(df_einzahlungen_ohne_inhaber['Auftraggeber/Empfänger']).sum().sort_values(ascending=False)
     df_quelle_auszahlung=df_auszahlungen_ohne_inhaber['Betrag'].groupby(df_auszahlungen_ohne_inhaber['Auftraggeber/Empfänger']).sum().sort_values(ascending=True) #hier sind noch die Kayatz enthalten
-             
-    #Erstellen eines DataFrames mit einer Auszahlungsübersicht über Unterkategorie und Monat
-    df_auszahlung_pro_kategorie_zeitintervall = datenauswertung.summieren_pro_kategorie_zeitintervall(df_auszahlung_kategorien, 'Buchung', 'M', 'Unterkategorie')
-        
+    
+    
     #Verwendungszweck ausgeben
     df_quelle_auszahlung_all=df_auszahlung_kategorien['Betrag'].groupby(df_auszahlung_kategorien['Hauptkategorie']).sum()
 
     #Quelle ausgeben NUR VORÜBERGEHEND ALS ÜBERBLICK  
     df_quelle_auszahlung_all=df_auszahlung_kategorien['Betrag'].groupby(df_auszahlung_kategorien['Hauptkategorie']).sum()
-    
+    '''
     
     '''
     AUSGABE
     1. Erstellen eines Sankey-Plots für Ein- und Auszahlungen
     '''
     #Sankey-Plot Ein- und Auszahlung ohne Kontoinhaber
-    #ploterzeugung.create_sankey_plot(df_quelle_einzahlung, abs(df_quelle_auszahlung))
+    #datenplots.create_sankey_plot(df_quelle_einzahlung, abs(df_quelle_auszahlung))
     
     #Datenausgabe
     print(df_daten)
+    
+    #Digramme
+    datenplots.liniendiagramm_erstellen(df_daten['Buchung'],df_daten[['Saldo']], 'Saldo', 'Wert in €', 'Datum') 
+    datenplots.saeulendiagramm_erstellen(abs(df_auswertung_pro_monat[['Einnahmen','Ausgaben']]), 'Ein- und Ausgaben','Wert in €')
+    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_monat[['Gewinn & Verlust', 'Gewinn & Verlust inkl. Rücklagen']], 'Gewinn & Verlust', 'Wert in €')
+    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_monat[['Sparquote']], 'Sparquote', 'Wert')
+    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_jahr[['Gewinn & Verlust', 'Gewinn & Verlust inkl. Rücklagen']], 'Gewinn & Verlust', 'Wert in €')   
+    
+    datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, df_auswertung_pro_monat['Einnahmen'], 
+                                      df_auswertung_pro_monat_mw12['Einnahmen'], 
+                                      df_auswertung_pro_monat_stabw12['Einnahmen'],
+                                      'Einnahmen', 'Wert in €')
+    
+    datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, df_auswertung_pro_monat['Ausgaben'], 
+                                      df_auswertung_pro_monat_mw12['Ausgaben'], 
+                                      df_auswertung_pro_monat_stabw12['Ausgaben'],
+                                      'Ausgaben', 'Wert in €')
+    
+    datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, df_auswertung_pro_monat['Sparquote'], 
+                                      df_auswertung_pro_monat_mw12['Sparquote'], 
+                                      df_auswertung_pro_monat_stabw12['Sparquote'],
+                                      'Sparquote', '-')
+
+    
     
     '''
     FINISH

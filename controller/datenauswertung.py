@@ -9,10 +9,76 @@ import pandas as pd
 
 def summieren_pro_kategorie_zeitintervall(df,zeitspalte,zeitintervall, kategoriespalte):
     list_kategorien=list(pd.unique(df[kategoriespalte].values.ravel()))
-    df_zeiteinheit=pd.DataFrame()
+    df_zeiteinheit_index=df.groupby(
+        pd.Grouper(key=zeitspalte, freq=zeitintervall)).sum().index
+    df_zeiteinheit=pd.DataFrame(index=df_zeiteinheit_index)
     
     for kategorie in list_kategorien:
         df_zeiteinheit[kategorie]=df[df[kategoriespalte]==kategorie].groupby(
             pd.Grouper(key=zeitspalte, freq=zeitintervall))['Betrag'].sum()
         
     return(df_zeiteinheit)
+
+def summieren_pro_hauptkategorie_zeitintervall(df, hauptkategorien):
+    
+    return(df[hauptkategorien].sum(axis=1))
+
+
+def erstellen_auswertung_pro_zeitintervall(df_einzahlung_kategorien, df_auszahlung_kategorien, zeitintervall):
+    
+    df_auswertung_pro_zeitintervall=pd.DataFrame(columns=['Einzahlungen', 
+                                                  'Auszahlungen', 
+                                                  'Einnahmen', 
+                                                  'Ausgaben',
+                                                  'Rücklagen',
+                                                  'Sparen',
+                                                  'Gewinn & Verlust',
+                                                  'Gewinn & Verlust inkl. Rücklagen',
+                                                  'Sparquote'
+                                                  ]
+                                         )
+    
+    dict_auswertungskategorien={'Einzahlungen':['Gehalt', 'staatl. Zuschüsse', 'Steuern', 'Bonusprogramme', 'sonstige Einzahlungen'],
+                                'Auszahlungen':['Sparen', 'Rücklagen', 'Rückzahlungen', 'Konsum'], 
+                                'Einnahmen':['Gehalt', 'staatl. Zuschüsse', 'Steuern', 'Bonusprogramme'],
+                                'Ausgaben':['Konsum'], 
+                                'Rücklagen':['Rücklagen'], #hier fehlt noch das Wertpapier
+                                'Sparen':['Sparen']
+                                }
+    
+    #Zusammenfassen der Hauptkategorien entsprechend der Auswertekategorien
+    for kategorie in dict_auswertungskategorien:
+        
+        #Erstellen des DataFrames und Sortierung nach Hauptkategorien sowie Zuordnung df_einzahlung & df_auszahlung
+        if kategorie in ['Einzahlungen', 'Einnahmen']:
+            df=summieren_pro_kategorie_zeitintervall(df_einzahlung_kategorien, 'Buchung', zeitintervall, 'Hauptkategorie') 
+        else:
+            df=summieren_pro_kategorie_zeitintervall(df_auszahlung_kategorien, 'Buchung', zeitintervall, 'Hauptkategorie')  
+        
+        #Summieren der Hauptkategorien entsprechend der Auswertekategorien
+        df_auswertung_pro_zeitintervall[kategorie]=summieren_pro_hauptkategorie_zeitintervall(df, dict_auswertungskategorien[kategorie])
+    
+    #Berechnung der Kennwerte Gewinn&Verlust, Gewinn&Verlust inkl. Rücklagen, Sparquote
+    df_auswertung_pro_zeitintervall['Gewinn & Verlust']=df_auswertung_pro_zeitintervall[['Einnahmen', 'Ausgaben', 'Sparen']].sum(axis=1)
+    df_auswertung_pro_zeitintervall['Gewinn & Verlust inkl. Rücklagen']=df_auswertung_pro_zeitintervall[['Einnahmen', 'Ausgaben', 'Rücklagen', 'Sparen']].sum(axis=1)
+    df_auswertung_pro_zeitintervall['Sparquote']=abs(df_auswertung_pro_zeitintervall['Sparen']/df_auswertung_pro_zeitintervall['Einnahmen'])
+    
+    return(df_auswertung_pro_zeitintervall)
+
+
+def mittelwert_ueber_zeitraum(df, zeitraum, min_zeitraum):
+    #Berechnung des Mittelwertes über einen bestimmten Zeitraum
+    df_mittelwert_ueber_zeitraum=pd.DataFrame(columns=df.columns)
+    df_mittelwert_ueber_zeitraum=df[df.columns.difference(['Sparquote'])].rolling(zeitraum,min_zeitraum).mean()
+    
+    #Berechnung der Sparquote, vorherige Funktion darauf nicht anwendbar
+    df_mittelwert_ueber_zeitraum['Sparquote']=abs(df_mittelwert_ueber_zeitraum['Sparen']/df_mittelwert_ueber_zeitraum['Einnahmen'])
+    
+    return(df_mittelwert_ueber_zeitraum)
+
+def stabw_ueber_zeitraum(df, zeitraum, min_zeitraum):
+    #Berechnung des Standardabweicung über einen bestimmten Zeitraum
+    df_stabw_ueber_zeitraum=pd.DataFrame(columns=df.columns)
+    df_stabw_ueber_zeitraum=df.rolling(zeitraum,min_zeitraum).std(skipna=True, ddof=0)
+    
+    return(df_stabw_ueber_zeitraum)
