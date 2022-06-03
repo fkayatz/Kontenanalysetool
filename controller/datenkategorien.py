@@ -51,7 +51,7 @@ def hauptkategorien_auswaehlen(gruppe):
         
     if gruppe == 'Auszahlungen':
         dict_hauptkategorien={'Sparen':'Sparen',
-                        'Rücklagen':'Rücklage Notgroschen|Rücklage Reisen',
+                        'Rücklagen':'Rücklage Notgroschen|Rücklage Reisen|Rücklage Auto',
                         'Wertpapier': 'Wertpapier',
                         'Rückzahlungen': 'Rückzahlungen',
                         'Konsum':('Nahrungsmittel, Getränke, Tabakwaren u.Ä.|'
@@ -130,7 +130,7 @@ def daten_kategorien_zuordnen(df):
     
     dict_unterkonten = {'Sparen':'spar',
                         'Rücklage Notgroschen':'notgroschen',
-                        'Wertpapier': 'wp-rechnung|isin|wertpapier',
+                        'Rücklage Auto': 'wp-rechnung|isin|wertpapier',
                         'Rücklage Reisen': 'reisen|urlaub',
                         'Rückzahlungen': 'rueckzahlung|auslage|uebertrag|rueckueberweis|np.nan'
                          }

@@ -4,6 +4,9 @@ Created on Sun Feb 20 13:44:25 2022
 
 @author: Fabian Kayatz
 """
+
+
+
 '''
 Model       - Datenhaltung
 View        - Präsentation / Darstellung / Benutzerinteraktion
@@ -14,8 +17,14 @@ from controller import datenaufbereitung
 from controller import datenfilter
 from controller import datenauswertung
 from controller import datenkategorien
+from controller import programm_monitoring
 from view import datenplots
 
+'''
+STARTZEIT
+'''
+hauptprogramm_monitoring=programm_monitoring.ProgrammLaufzeit('Hauptprogramm')
+hauptprogramm_monitoring.startzeit_definieren()
 
 if __name__ == '__main__':
     print(__name__)
@@ -25,12 +34,16 @@ if __name__ == '__main__':
     Definition der Variablen und Eingabebefehle zukünftigt können auch HMIs hinzukommen.
     '''
     #Ordnerpfad zu den Rohdaten vorgeben
+    kontoinhaber = 'Fabian Kayatz'
     ordnerpfad = r'D:\Familie Kayatz\2 Finanzen\Girokonto\Kontenanalyse\Rohdaten'
+    datum_format='%d.%m.%y'
     
     '''
     DATENIMPORT
     1. Daten aus Excelfiles auslesen und in einem DataFrame zusammenfügen
     2. Aufbereitung der Rohdaten, z.B. Duplikate entfernen, Sortieren, Neuindexieren
+    3. Füllen der Spalte Emfpänger im Fall "nan" mit dem Kontoinhaber
+    4. Anpassen des Zeitformats (in Arbeit)
     '''
     # df_rohdaten aus mehreren Dateien importieren und in einem DataFrame zusammenfügen
     list_dateien = datenimport.dateiliste_erstellen(ordnerpfad)
@@ -42,6 +55,13 @@ if __name__ == '__main__':
     datenaufbereitung.duplikate_entfernen(df_daten, True)
     datenaufbereitung.daten_sortieren(df_daten, True, 'Buchung', False)
     datenaufbereitung.reset_index(df_daten, True)
+    
+    #Empfänger = nan ersetzen durch Kontoinhaber
+    df_daten.loc[df_daten['Auftraggeber/Empfänger'].isna(),'Auftraggeber/Empfänger']=kontoinhaber
+    
+    #Ändern des Datumformats
+    #df_daten['Buchung']=df_daten['Buchung'].dt.strftime(datum_format) #führt zu einer Ausgabe als String
+    
     
     '''
     EINZAHLUNGEN UND AUSZAHLUNGEN AUF DAS KONTO
@@ -73,7 +93,7 @@ if __name__ == '__main__':
                                                                                               'Unterkategorie'
                                                                                               )
     
-    #Erstellen eines DataFrames mit einer Auswertung über das Zeitintervall/Monat (aktuelle Baustelle)   
+    #Erstellen eines DataFrames mit einer Auswertung über das Zeitintervall/Monat   
     df_auswertung_pro_monat=datenauswertung.erstellen_auswertung_pro_zeitintervall(df_einzahlung_kategorien, 
                                                                                    df_auszahlung_kategorien, 
                                                                                    'M'
@@ -83,11 +103,17 @@ if __name__ == '__main__':
                                                                                   'Y'
                                                                                   )
     
-    #Berechnung der Mittelwertdaten über die letzten Monate
-    df_auswertung_pro_monat_mw12=datenauswertung.mittelwert_ueber_zeitraum(df_auswertung_pro_monat, 12, 3)
+    #Berechnung der Mittelwertdaten der Hauptkategorien über die letzten Monate
+    df_auswertung_pro_monat_mw12=datenauswertung.mittelwert_ueber_zeitraum(df_auswertung_pro_monat, 12, 3, True, 'Sparquote', 'Sparen', 'Einnahmen')
     
-    #Berechnung der Standardabweichung über die letzten Monate
+    #Berechnung der Standardabweichung der Hauptkategorien über die letzten Monate
     df_auswertung_pro_monat_stabw12=datenauswertung.stabw_ueber_zeitraum(df_auswertung_pro_monat, 12, 3)
+    
+    #Berechnung der Mittelwertdaten der Unterkategorien über die letzten Monate
+    df_auszahlung_pro_kategorie_monat_mw12=datenauswertung.mittelwert_ueber_zeitraum(df_auszahlung_pro_kategorie_monat, 12, 3)
+    
+    #Berechnung der Standardabweichung der Unterkategorien über die letzten Monate
+    df_auszahlung_pro_kategorie_monat_stabw12=datenauswertung.stabw_ueber_zeitraum(df_auszahlung_pro_kategorie_monat, 12, 3)
     '''
     #Erstellung von 2 DataFrames Einzahlung vom Kontoinhaber und Einzahlungen von sonstigen
     df_einzahlungen_von_inhaber=df_konto_einzahlungen[df_konto_einzahlungen['Auftraggeber/Empfänger'].str.contains('Fabian Kayatz|Christina Kayatz|Familie Kayatz', case=False, na=False)]
@@ -117,33 +143,78 @@ if __name__ == '__main__':
     #datenplots.create_sankey_plot(df_quelle_einzahlung, abs(df_quelle_auszahlung))
     
     #Datenausgabe
-    print(df_daten)
+    #print(df_daten)
     
-    #Digramme
-    datenplots.liniendiagramm_erstellen(df_daten['Buchung'],df_daten[['Saldo']], 'Saldo', 'Wert in €', 'Datum') 
-    datenplots.saeulendiagramm_erstellen(abs(df_auswertung_pro_monat[['Einnahmen','Ausgaben']]), 'Ein- und Ausgaben','Wert in €')
-    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_monat[['Gewinn & Verlust', 'Gewinn & Verlust inkl. Rücklagen']], 'Gewinn & Verlust', 'Wert in €')
-    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_monat[['Sparquote']], 'Sparquote', 'Wert')
-    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_jahr[['Gewinn & Verlust', 'Gewinn & Verlust inkl. Rücklagen']], 'Gewinn & Verlust', 'Wert in €')   
+    #Diagramme
+    #Saldo über die Zeit
+    datenplots.liniendiagramm_erstellen(df_daten['Buchung'],
+                                        df_daten[['Saldo']], 
+                                        'Saldo', 
+                                        'Kontosaldo in €', 
+                                        'Datum'
+                                        ) 
     
-    datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, df_auswertung_pro_monat['Einnahmen'], 
-                                      df_auswertung_pro_monat_mw12['Einnahmen'], 
-                                      df_auswertung_pro_monat_stabw12['Einnahmen'],
-                                      'Einnahmen', 'Wert in €')
+    #Einnahmen- und Ausgaben pro Monat
+    datenplots.saeulendiagramm_erstellen(abs(df_auswertung_pro_monat[['Einnahmen','Ausgaben']]), 
+                                         'Ein- und Ausgaben',
+                                         'Wert in €'
+                                         )
     
-    datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, df_auswertung_pro_monat['Ausgaben'], 
-                                      df_auswertung_pro_monat_mw12['Ausgaben'], 
-                                      df_auswertung_pro_monat_stabw12['Ausgaben'],
-                                      'Ausgaben', 'Wert in €')
+    #Gewinn & Verlust pro Monat mit/ohne Rücklagen
+    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_monat[['Gewinn & Verlust', 'Gewinn & Verlust inkl. Rücklagen']], 
+                                         'Gewinn & Verlust', 
+                                         'Wert in €'
+                                         )
     
-    datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, df_auswertung_pro_monat['Sparquote'], 
-                                      df_auswertung_pro_monat_mw12['Sparquote'], 
-                                      df_auswertung_pro_monat_stabw12['Sparquote'],
-                                      'Sparquote', '-')
-
+    #Gewinn & Verlust pro Jahr mit/ohne Rücklagen
+    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_jahr[['Gewinn & Verlust', 'Gewinn & Verlust inkl. Rücklagen']], 
+                                         'Gewinn & Verlust', 
+                                         'Wert in €'
+                                         )   
     
+    #Sparquote pro Monat
+    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_monat[['Sparquote']], 
+                                         'Sparquote', 
+                                         'Sparquote in [-]'
+                                         )
     
-    '''
-    FINISH
-    '''
-    print('FINISH')
+    #Einnahmen pro Monat inkl. Mittelwert und StAbw über die letzten 12 Monate
+    datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, 
+                                                 df_auswertung_pro_monat['Einnahmen'],
+                                                 df_auswertung_pro_monat_mw12['Einnahmen'],
+                                                 df_auswertung_pro_monat_stabw12['Einnahmen'],
+                                                 'Einnahmen',
+                                                 'Einnahmen in €'
+                                                 )
+    
+    #Ausgaben pro Monat inkl. Mittelwert und StAbw über die letzten 12 Monate
+    datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, 
+                                                 df_auswertung_pro_monat['Ausgaben'],
+                                                 df_auswertung_pro_monat_mw12['Ausgaben'],
+                                                 df_auswertung_pro_monat_stabw12['Ausgaben'],
+                                                 'Ausgaben', 
+                                                 'Ausgaben in €'
+                                                 )
+    
+    #Sparquote pro Monat inkl. Mittelwert und StAbw über die letzten 12 Monate
+    datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, 
+                                                 df_auswertung_pro_monat['Sparquote'],
+                                                 df_auswertung_pro_monat_mw12['Sparquote'],
+                                                 df_auswertung_pro_monat_stabw12['Sparquote'],
+                                                 'Sparquote',
+                                                 'Sparquote in [-]'
+                                                 )
+    
+    #Auszahlungen im aktuellen Monat
+    datenplots.saeulendiagramm_erstellen(df_auszahlung_pro_kategorie_monat.transpose()[[hauptprogramm_monitoring.laufzeitstart.strftime('%Y-%m-%d')]], 
+                                         'Auszahlungen aktueller Monat',
+                                         'Auszahlungen in €'
+                                         )                                   
+'''
+ZEIT PROGRAMMENDE
+'''
+hauptprogramm_monitoring.laufzeit_bestimmen(True)
+'''
+FINISH
+'''
+print('FINISH')

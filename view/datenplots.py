@@ -10,8 +10,13 @@ import plotly.graph_objects as go
 import pandas as pd
     
 def saeulendiagramm_erstellen(df, titel, ylabel):
+    
+    #Prüfen ob Index ein Zeitformat ist und dann ins gewünschte Format ändern
+    if type(df.index) == pd.DatetimeIndex:
+        labels = df.index.strftime(date_format='%m/%y').tolist()
+    else:
+        labels = df.index
         
-    labels = df.index.strftime(date_format='%y-%m-%d').tolist()
     list_messreihen=df.columns.tolist()
     #Graphparameter
     saeulenbreite=0.8/len(list_messreihen)
@@ -56,11 +61,17 @@ fig1.show(renderer='svg') # =browser oder svg (Anzeige in Spyder)
 
 def liniendiagramm_erstellen(df_x, df_y, titel, ylabel, xlabel):
     
+    #Prüfen ob Index ein Zeitformat ist und dann ins gewünschte Format ändern
+    if type(df_x) == pd.DatetimeIndex:
+        labels = df_x.strftime(date_format='%m/%y').tolist()
+    else:
+        labels = df_x   
+        
     #Definition des Diagramms
     fig, ax = plt.subplots()
 
     #Einfügen der Messreihen
-    ax.plot(df_x,df_y, linewidth=2.0)
+    ax.plot(labels,df_y, linewidth=2.0)
 
     #Formatierung des Graphen
     ax.set_ylabel(ylabel)
@@ -103,21 +114,27 @@ def create_sankey_plot(df_1,df_2):
 
 def saeulen_linien_diagramm_erstellen(x,df_saeulen, df_linien, df_linien_stabw, titel, ylabel):
     
+    #Prüfen ob Index ein Zeitformat ist und dann ins gewünschte Format ändern
+    if type(x) == pd.DatetimeIndex:
+        labels = x.strftime(date_format='%m/%y').tolist()
+    else:
+        labels = x   
+    
     #Definition des Diagramms
     fig, ax=plt.subplots()
     fig.tight_layout()
     
     #Einfügen das Säulendiagramm
-    ax.bar(x,df_saeulen,10)
+    ax.bar(labels,df_saeulen,0.8)
     
     #Einfügen des Liniendiagramm
-    ax.plot(x,df_linien, linewidth=2.0)
+    ax.plot(labels,df_linien, linewidth=2.0)
     
     #Einfügen der Standardabweichung und Ausfüllen
     y1=df_linien-df_linien_stabw
     y2=df_linien+df_linien_stabw
     
-    ax.fill_between(x, y1, y2, alpha=.5, linewidth=0)
+    ax.fill_between(labels, y1, y2, alpha=.5, linewidth=0)
     
     #Formatierung des Graphen
     ax.set_ylabel(ylabel)

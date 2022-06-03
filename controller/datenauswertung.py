@@ -6,6 +6,7 @@ Created on Sun Apr  3 10:53:20 2022
 """
 
 import pandas as pd
+import numpy as np
 
 def summieren_pro_kategorie_zeitintervall(df,zeitspalte,zeitintervall, kategoriespalte):
     list_kategorien=list(pd.unique(df[kategoriespalte].values.ravel()))
@@ -66,14 +67,20 @@ def erstellen_auswertung_pro_zeitintervall(df_einzahlung_kategorien, df_auszahlu
     return(df_auswertung_pro_zeitintervall)
 
 
-def mittelwert_ueber_zeitraum(df, zeitraum, min_zeitraum):
+def mittelwert_ueber_zeitraum(df, zeitraum, min_zeitraum, verhaeltnis = False, quotient_spalte = np.nan, zaehler_spalte=np.nan, nenner_spalte=np.nan):
+    
     #Berechnung des Mittelwertes über einen bestimmten Zeitraum
     df_mittelwert_ueber_zeitraum=pd.DataFrame(columns=df.columns)
-    df_mittelwert_ueber_zeitraum=df[df.columns.difference(['Sparquote'])].rolling(zeitraum,min_zeitraum).mean()
     
-    #Berechnung der Sparquote, vorherige Funktion darauf nicht anwendbar
-    df_mittelwert_ueber_zeitraum['Sparquote']=abs(df_mittelwert_ueber_zeitraum['Sparen']/df_mittelwert_ueber_zeitraum['Einnahmen'])
+    if verhaeltnis == True:
+        df_mittelwert_ueber_zeitraum=df[df.columns.difference([quotient_spalte])].rolling(zeitraum,min_zeitraum).mean()
     
+        #Berechnung der Sparquote, vorherige Funktion darauf nicht anwendbar
+        df_mittelwert_ueber_zeitraum[quotient_spalte]=abs(df_mittelwert_ueber_zeitraum[zaehler_spalte]/df_mittelwert_ueber_zeitraum[nenner_spalte])
+    
+    else:
+        df_mittelwert_ueber_zeitraum=df.rolling(zeitraum,min_zeitraum).mean()
+        
     return(df_mittelwert_ueber_zeitraum)
 
 def stabw_ueber_zeitraum(df, zeitraum, min_zeitraum):
