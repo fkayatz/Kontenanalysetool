@@ -18,6 +18,7 @@ from controller import datenfilter
 from controller import datenauswertung
 from controller import datenkategorien
 from controller import programm_monitoring
+from controller import zeitmodul
 from view import datenplots
 
 '''
@@ -206,7 +207,9 @@ if __name__ == '__main__':
                                                  )
     
     #Auszahlungen im aktuellen Monat
-    datenplots.saeulendiagramm_erstellen(df_auszahlung_pro_kategorie_monat.transpose()[[hauptprogramm_monitoring.laufzeitstart.strftime('%Y-%m-%d')]], 
+    heutiges_datum=zeitmodul.heutiges_datum_bestimmen()
+    letzter_tag_im_monat=zeitmodul.letzter_tag_im_monat_bestimmen(heutiges_datum)
+    datenplots.saeulendiagramm_erstellen(df_auszahlung_pro_kategorie_monat.transpose()[[letzter_tag_im_monat.strftime('%Y-%m-%d')]], 
                                          'Auszahlungen aktueller Monat',
                                          'Auszahlungen in €'
                                          )                                   
