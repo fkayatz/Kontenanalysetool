@@ -17,12 +17,20 @@ def summieren_pro_kategorie_zeitintervall(df,zeitspalte,zeitintervall, kategorie
     for kategorie in list_kategorien:
         df_zeiteinheit[kategorie]=df[df[kategoriespalte]==kategorie].groupby(
             pd.Grouper(key=zeitspalte, freq=zeitintervall))['Betrag'].sum()
-        
+    
+    #Ersetzen aller Wert mit nan durch 0
+    df_zeiteinheit.replace(np.nan,0,True)
+    
     return(df_zeiteinheit)
 
 def summieren_pro_hauptkategorie_zeitintervall(df, hauptkategorien):
     
-    return(df[hauptkategorien].sum(axis=1))
+    df_hauptkategorie_zeiteinheit=df[hauptkategorien].sum(axis=1)
+
+    #Ersetzen aller Wert mit nan durch 0
+    df_hauptkategorie_zeiteinheit.replace(np.nan,0,True)
+
+    return(df_hauptkategorie_zeiteinheit)
 
 
 def erstellen_auswertung_pro_zeitintervall(df_einzahlung_kategorien, df_auszahlung_kategorien, zeitintervall):
@@ -84,7 +92,8 @@ def mittelwert_ueber_zeitraum(df, zeitraum, min_zeitraum, verhaeltnis = False, q
     return(df_mittelwert_ueber_zeitraum)
 
 def stabw_ueber_zeitraum(df, zeitraum, min_zeitraum):
-    #Berechnung des Standardabweicung über einen bestimmten Zeitraum
+    
+    #Berechnung des Standardabweichung über einen bestimmten Zeitraum
     df_stabw_ueber_zeitraum=pd.DataFrame(columns=df.columns)
     df_stabw_ueber_zeitraum=df.rolling(zeitraum,min_zeitraum).std(skipna=True, ddof=0)
     

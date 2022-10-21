@@ -18,22 +18,30 @@ def unterkategorien_auswaehlen(gruppe):
                               }
         
     if gruppe == 'Auszahlungen':
-        dict_unterkategorien={'Nahrungsmittel, Getränke, Tabakwaren u.Ä.':('kaufland|konsum|frida|lidl|aldi|netto|edeka|penny'
-                                                                           +'|rewe|simmel|lebensmittelhandel|restaurant'
-                                                                           +'|nordsee gmbh|mcdonalds|burger king|dominos|'
-                                                                           +'baeck|backerei|backhaus|menu|sodexo|kochloeffel|'
-                                                                           +'essen|soup|fruehstueck|mittag|abendbrot|baguette'),
+        dict_unterkategorien={'Nahrungsmittel, Getränke, Tabakwaren u.Ä.':('kaufland|konsum|frida|lidl|aldi|netto|edeka|penny|hofer|'
+                                                                           +'rewe|simmel|lebensmittelhandel|restaurant|'
+                                                                           +'baeck|backerei|backhaus|menu|sodexo|kochloeffel|al dente|'
+                                                                           +'essen|soup|fruehstueck|mittag|abendbrot|baguette|'
+                                                                           +'essengeld'),
                               'Bekleidung und Schuhe':('esprit|h+m|s.oliver|sport scheck|peek & cloppenburg|ernstings fam|'
                                                        +'zalando|jack&jones|textilhandel|reno|deichmann|pull + bear|'
-                                                       +'vivobaerfoot'),
-                              'Wohnen, Energie, Wohnungsinstandhaltung':'wohnen|miete|strom|wasser|stadtwerke',
+                                                       +'vivobaerfoot|c+a'),
+                              'Wohnen, Energie, Wohnungsinstandhaltung':'wohnen|miete|strom|wasser|stadtwerke|nebenkosten|betriebskosten',
                               'Innenausstattung, Haushaltsgeräte und -gegenstände':'ikea|hoeffner|amzn|amazon|matraze|hausgeraet|karstadt|conrad',
-                              'Gesundheit':'apotheke|gesundheit|friseur|haar|fielmann|apollo',
-                              'Verkehr':'tankstelle|esso|star|tamoil|orlen|aral|total service station|Kraftfahrzeug|kfz|reifen|autohaus|parking|garage|parkhaus|bike|fahrrad|db vertrieb|handyticket|dvb',
+                              'Gesundheit':'apotheke|gesundheit|friseur|haar|fielmann|apollo|drogeriemarkt muller',
+                              'Verkehr':('tankstelle|esso|star|tamoil|orlen|aral|shell|total service station|'
+                                         +'kraftfahrzeug|kfz|reifen|autohaus|parking|parkplatz|garage|parkhaus|'
+                                         +'bike|fahrrad|db vertrieb|handyticket|dvb'),
                               'Post und Telekommunikation':'vodafone|klarmobil|vodafone|telekom',
-                              'Freizeit, Unterhaltung und Kultur':'google|apple|buchhandlung|buecher|lesen|kino|therme|schwimmbad|sport|globetrotter|decathlon|outdoor|event|turn|fitbit|verlag',
+                              'Freizeit, Unterhaltung und Kultur':('google|apple|kino|therme|schwimmbad|schwimmhalle|'
+                                                                   +'thalia|buchhandlung|buecher|lesen|'
+                                                                   +'sport|globetrotter|decathlon|outdoor|event|turn|fitbit|verlag|'
+                                                                   +'trainingslager|bergsteiger|fussball'),
                               'Bildungswesen':'schule|kindertageseinrichtung|kirchgemeinde dresden|studentenbeitraege',
-                              'Beherbungs- und Gaststättendienstleistungen':'restaurant|hotel|gaststätte|urlaub|ruestzeit|schenke|ferien',
+                              'Beherbungs- und Gaststättendienstleistungen':('hotel|urlaub|ruestzeit|ferien|uebernachtung|'
+                                                                             +'restaurant|gaststaette|schenke|cafe|'
+                                                                             +'nordsee gmbh|mcdonalds|burger king|burgerking|dominos|'
+                                                                             +'hans im gluck'),
                               'Versicherungen':'huk|alte leipziger leben|ergo|allianz',
                               'Spenden':'spend|hilfe',
                               'andere Waren und Dienstleistungen':'paypal|bargeldauszahlung|drogerie|blumen',
@@ -92,6 +100,8 @@ def daten_unterkategorien_zuordnen(df, gruppe, dict_kontoinhaber,dict_unterkonte
    
         df.loc[filter_kategorie,'Unterkategorie']=kategorie
     
+    print('test', df[df['Unterkategorie']=='NaN'])
+    
     #Prüfen ob Filter erfolgreich
     fehlermeldung='ACHTUNG: Die folgende Anzahl an ' + gruppe + ' ' + 'konnte keiner Unterkategorie zugeordnet werden:'
     if df['Unterkategorie'].isna().any()==True:
@@ -129,7 +139,7 @@ def daten_kategorien_zuordnen(df):
     dict_unterkategorien=unterkategorien_auswaehlen(gruppe)  
     
     dict_unterkonten = {'Sparen':'spar',
-                        'Rücklage Notgroschen':'notgroschen',
+                        'Rücklage Notgroschen':'notgroschen|ruecklage',
                         'Rücklage Auto': 'wp-rechnung|isin|wertpapier',
                         'Rücklage Reisen': 'reisen|urlaub',
                         'Rückzahlungen': 'rueckzahlung|auslage|uebertrag|rueckueberweis|np.nan'

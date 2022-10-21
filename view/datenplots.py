@@ -148,6 +148,42 @@ def saeulen_linien_diagramm_erstellen(x,df_saeulen, df_linien, df_linien_stabw, 
     
     return()
 
+# Liniendiagramm mit Füllbereich
+def liniendiagramm_mit_fuellbereich_erstellen(df_x, df_y, df_yfill, titel, ylabel, xlabel):
+    
+    #Prüfen ob Index ein Zeitformat ist und dann ins gewünschte Format ändern
+    if type(df_x) == pd.DatetimeIndex:
+        labels = df_x.strftime(date_format='%m/%y').tolist()
+    else:
+        labels = df_x   
+        
+    #Definition des Diagramms
+    fig, ax = plt.subplots()
+
+    #Einfügen der Messreihen
+    ax.plot(labels,df_y, linewidth=2.0)
+    
+    #Einfügen der Füllbereiche
+    for i in range(0,len(df_yfill.columns),1):
+
+        if i == 0:
+            ax.fill_between(labels, 0, df_yfill.iloc[:,i], alpha=.5, linewidth=0)
+        else:
+            ax.fill_between(labels, df_yfill.iloc[:,i-1], df_yfill.iloc[:,i], alpha=.5, linewidth=0)
+        i=i+1
+        
+    #Formatierung des Graphen
+    ax.set_ylabel(ylabel)
+    ax.set_title(titel)
+    ax.tick_params(axis='x',labelrotation=90)
+    ax.legend(list(df_y.columns) + list(df_yfill.columns))
+    ax.grid(True, linestyle='--')
+    
+    #Darstellung des Graphs
+    plt.show()
+    
+    return()
+
 # run if the file is directly executed
 if __name__ == "__main__":
     print(__name__)

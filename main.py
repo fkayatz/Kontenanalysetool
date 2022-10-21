@@ -173,12 +173,6 @@ if __name__ == '__main__':
                                          'Wert in €'
                                          )   
     
-    #Sparquote pro Monat
-    datenplots.saeulendiagramm_erstellen(df_auswertung_pro_monat[['Sparquote']], 
-                                         'Sparquote', 
-                                         'Sparquote in [-]'
-                                         )
-    
     #Einnahmen pro Monat inkl. Mittelwert und StAbw über die letzten 12 Monate
     datenplots.saeulen_linien_diagramm_erstellen(df_auswertung_pro_monat.index, 
                                                  df_auswertung_pro_monat['Einnahmen'],
@@ -212,7 +206,29 @@ if __name__ == '__main__':
     datenplots.saeulendiagramm_erstellen(df_auszahlung_pro_kategorie_monat.transpose()[[letzter_tag_im_monat.strftime('%Y-%m-%d')]], 
                                          'Auszahlungen aktueller Monat',
                                          'Auszahlungen in €'
-                                         )                                   
+                                         )
+    
+    #Mittlere Auszahlung der letzten 12 Monate (noch in der Entwicklung, Berechnung stimmt nicht da Monate mit nan ignoriert werden)
+    heutiges_datum=zeitmodul.heutiges_datum_bestimmen()
+    letzter_tag_im_monat=zeitmodul.letzter_tag_im_monat_bestimmen(heutiges_datum)
+    datenplots.saeulendiagramm_erstellen(df_auszahlung_pro_kategorie_monat_mw12.transpose()[[letzter_tag_im_monat.strftime('%Y-%m-%d')]],
+                                         'Auszahlung letzten 12 Monaten',
+                                         'Auszahlung in €'
+                                         )      
+    
+    #ENTWICKLUNGSBEREICH   
+        
+    #Übersicht Einnahmen und Auszahlungstypen
+    import pandas as pd
+    df_a = pd.DataFrame(columns=['Einnahmen','Ausgaben', 'Ausgaben + Sparen', 'Ausgaben + Sparen + Rücklagen'])
+    df_a['Einnahmen']=df_auswertung_pro_monat['Einnahmen']
+    df_a['Ausgaben']=abs(df_auswertung_pro_monat['Ausgaben'])
+    df_a['Ausgaben + Sparen']=abs(df_auswertung_pro_monat['Ausgaben']+df_auswertung_pro_monat['Sparen'])
+    df_a['Ausgaben + Sparen + Rücklagen']=abs(df_auswertung_pro_monat['Ausgaben']+df_auswertung_pro_monat['Sparen']+df_auswertung_pro_monat['Rücklagen'])
+
+    datenplots.liniendiagramm_mit_fuellbereich_erstellen(df_a.index, df_a[['Einnahmen']], df_a[['Ausgaben', 'Ausgaben + Sparen', 'Ausgaben + Sparen + Rücklagen']], 'Übersicht', 'Betrag in €', 'Zeit') 
+
+              
 '''
 ZEIT PROGRAMMENDE
 '''
