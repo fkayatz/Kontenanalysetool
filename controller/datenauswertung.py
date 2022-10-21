@@ -39,8 +39,10 @@ def erstellen_auswertung_pro_zeitintervall(df_einzahlung_kategorien, df_auszahlu
                                                   'Auszahlungen', 
                                                   'Einnahmen', 
                                                   'Ausgaben',
-                                                  'Rücklagen',
                                                   'Sparen',
+                                                  'Rücklagen',
+                                                  'Ausgaben + Sparen',
+                                                  'Ausgaben + Sparen + Rücklagen',
                                                   'Gewinn & Verlust',
                                                   'Gewinn & Verlust inkl. Rücklagen',
                                                   'Sparquote'
@@ -67,7 +69,9 @@ def erstellen_auswertung_pro_zeitintervall(df_einzahlung_kategorien, df_auszahlu
         #Summieren der Hauptkategorien entsprechend der Auswertekategorien
         df_auswertung_pro_zeitintervall[kategorie]=summieren_pro_hauptkategorie_zeitintervall(df, dict_auswertungskategorien[kategorie])
     
-    #Berechnung der Kennwerte Gewinn&Verlust, Gewinn&Verlust inkl. Rücklagen, Sparquote
+    #Berechnung der Kennwerte Ausgaben + Sparen, Ausgaben + Sparen + Rücklagen, Gewinn&Verlust, Gewinn&Verlust inkl. Rücklagen, Sparquote
+    df_auswertung_pro_zeitintervall['Ausgaben + Sparen']=df_auswertung_pro_zeitintervall[['Ausgaben', 'Sparen']].sum(axis=1)
+    df_auswertung_pro_zeitintervall['Ausgaben + Sparen + Rücklagen']=df_auswertung_pro_zeitintervall[['Ausgaben', 'Sparen', 'Rücklagen']].sum(axis=1)
     df_auswertung_pro_zeitintervall['Gewinn & Verlust']=df_auswertung_pro_zeitintervall[['Einnahmen', 'Ausgaben', 'Sparen']].sum(axis=1)
     df_auswertung_pro_zeitintervall['Gewinn & Verlust inkl. Rücklagen']=df_auswertung_pro_zeitintervall[['Einnahmen', 'Ausgaben', 'Rücklagen', 'Sparen']].sum(axis=1)
     df_auswertung_pro_zeitintervall['Sparquote']=abs(df_auswertung_pro_zeitintervall['Sparen']/df_auswertung_pro_zeitintervall['Einnahmen'])

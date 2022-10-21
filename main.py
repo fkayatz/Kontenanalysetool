@@ -214,19 +214,15 @@ if __name__ == '__main__':
     datenplots.saeulendiagramm_erstellen(df_auszahlung_pro_kategorie_monat_mw12.transpose()[[letzter_tag_im_monat.strftime('%Y-%m-%d')]],
                                          'Auszahlung letzten 12 Monaten',
                                          'Auszahlung in €'
-                                         )      
-    
-    #ENTWICKLUNGSBEREICH   
+                                         )       
         
-    #Übersicht Einnahmen und Auszahlungstypen
-    import pandas as pd
-    df_a = pd.DataFrame(columns=['Einnahmen','Ausgaben', 'Ausgaben + Sparen', 'Ausgaben + Sparen + Rücklagen'])
-    df_a['Einnahmen']=df_auswertung_pro_monat['Einnahmen']
-    df_a['Ausgaben']=abs(df_auswertung_pro_monat['Ausgaben'])
-    df_a['Ausgaben + Sparen']=abs(df_auswertung_pro_monat['Ausgaben']+df_auswertung_pro_monat['Sparen'])
-    df_a['Ausgaben + Sparen + Rücklagen']=abs(df_auswertung_pro_monat['Ausgaben']+df_auswertung_pro_monat['Sparen']+df_auswertung_pro_monat['Rücklagen'])
-
-    datenplots.liniendiagramm_mit_fuellbereich_erstellen(df_a.index, df_a[['Einnahmen']], df_a[['Ausgaben', 'Ausgaben + Sparen', 'Ausgaben + Sparen + Rücklagen']], 'Übersicht', 'Betrag in €', 'Zeit') 
+    #Vergleich Einnahmen, Ausgaben, Ausgaben + Sparen und Ausgaben + Sparen + Rücklagen und Auszahlungstypen
+    datenplots.liniendiagramm_mit_fuellbereich_erstellen(df_auswertung_pro_monat.index, 
+                                                         df_auswertung_pro_monat[['Einnahmen']], 
+                                                         abs(df_auswertung_pro_monat[['Ausgaben', 'Ausgaben + Sparen', 'Ausgaben + Sparen + Rücklagen']]), 
+                                                         'Übersicht', 
+                                                         'Betrag in €', 
+                                                         'Zeit') 
 
               
 '''
